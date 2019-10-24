@@ -1,16 +1,19 @@
 import time
 import pandas as pd
-import numpy as np
 
 CITY_DATA = { 'chicago': 'chicago.csv',
               'new york city': 'new_york_city.csv',
               'washington': 'washington.csv' }
 
-MONTHS =    { 'january': 1,'february': 2,'march': 3,
-              'april': 4, 'may': 5, 'june': 6, 'all': 7 }
+#MONTHS =    { 'january': 1,'february': 2,'march': 3,
+#              'april': 4, 'may': 5, 'june': 6, 'all': 7 }
 
-DAYS =      { 'sunday': 1, 'monday': 2, 'tuesday': 3, 'wednesday': 4,
-              'thursday': 5, 'friday': 6, 'saturday': 7, 'all': 8 }
+MONTHS = ['all', 'january','february','march', 'april', 'may', 'june']
+
+#DAYS =      { 'sunday': 1, 'monday': 2, 'tuesday': 3, 'wednesday': 4,
+#              'thursday': 5, 'friday': 6, 'saturday': 7, 'all': 8 }
+
+DAYS = ['all', 'sunday','monday','tuesday','wednesday','thursday','friday','saturday']
 
 
 def get_filters():
@@ -23,7 +26,7 @@ def get_filters():
         (str) day - name of the day of week to filter by, or "all" to apply no day filter
     """
     city, month, day = '', '', ''
-
+    
     print('Hello! Let\'s explore some US bikeshare data!')
     # TO DO: get user input for city (chicago, new york city, washington). HINT: Use a while loop to handle invalid inputs
     while True:
@@ -39,7 +42,7 @@ def get_filters():
         month = input(\
             '\nSelect a month:\nAll\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\n\nYour selection: ')\
             .lower()
-        if month in list(MONTHS.keys()):
+        if month in MONTHS:
             break
         else:
             print('\nPlease try again!\n')
@@ -49,7 +52,7 @@ def get_filters():
         day = input(\
             '\nSelect a day:\nAll\nSunday\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\n\nYour selection: ')\
             .lower()
-        if day in list(DAYS.keys()):
+        if day in DAYS:
             break
         else:
             print('\nPlease try again!\n')
@@ -75,7 +78,7 @@ def load_data(city, month, day):
     df['Day of week'] = df['Start Time'].dt.weekday_name
 
     if month != 'all':
-        month = MONTHS[month]
+        month = MONTHS.index(month)
         df = df[df['Month'] == month]
 
     if day != 'all':
@@ -91,20 +94,17 @@ def time_stats(df):
     start_time = time.time()
 
     # TO DO: display the most common month
-    most_common_month = df['Month'].mode()[0]
     print('Most common month:\n',
-          list(MONTHS.keys())[list(MONTHS.values()).index(most_common_month)].title())
+          MONTHS[df['Month'].mode()[0]].title())
 
     # TO DO: display the most common day of week
-    most_common_day_of_week = df['Day of week'].mode()[0]
     print('\nMost common day of week:\n',
-          most_common_day_of_week)
+          df['Day of week'].mode()[0])
 
     # TO DO: display the most common start hour
     df['Hour'] = df['Start Time'].dt.hour
-    most_common_start_hour = int(df['Hour'].mode()[0])
     print('\nMost common start hour:\n',
-          most_common_start_hour % 12, ['AM', 'PM'][most_common_start_hour >= 12])
+          int(df['Hour'].mode()[0]) % 12, ['AM', 'PM'][int(df['Hour'].mode()[0]) >= 12])
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
@@ -117,20 +117,18 @@ def station_stats(df):
     start_time = time.time()
 
     # TO DO: display most commonly used start station
-    most_commonly_used_start_station = df['Start Station'].mode()[0]
     print('Most commonly used start station:\n',
-          most_commonly_used_start_station)
+          df['Start Station'].mode()[0])
 
     # TO DO: display most commonly used end station
-    most_commonly_used_end_station = df['End Station'].mode()[0]
     print('\nMost commonly used end station:\n',
-          most_commonly_used_end_station)
+          df['End Station'].mode()[0])
 
     # TO DO: display most frequent combination of start station and end station trip
-    df['From To'] = df['Start Station'].str.cat(df['End Station'], sep =" to ")
-    most_frequent_combination_of_start_to_end_trip = df['From To'].mode()[0]
+    df['From To'] = df['Start Station'].str.cat(df['End Station'],sep=' to ')
+    #df['From To'] = df['Start Station'].astype(str) + ' to ' + df['End Station'].astype(str)
     print('\nMost frequent combination of start to end trip:\n',
-          most_frequent_combination_of_start_to_end_trip)
+          df['From To'].mode()[0])
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
@@ -202,8 +200,7 @@ def display_data(df):
     """Upon request of user, print raw data."""
     for i in range(0, df.shape[0], 5):
         print("\nI can show you 5 lines of raw data at a time if you like.")
-        action = input("Type 'yes' to continue or 'no' to stop: ")
-        if action.lower() != 'yes':
+        if input("Type 'yes' to continue: ") != 'yes':
             break
         else:
             print(df.iloc[i: i + 5])
